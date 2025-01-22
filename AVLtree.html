@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AVL Tree Visualization</title>
+
+    <!-- CSS sheet for how the page is laid out -->
+    <link rel="stylesheet" href="visualizationPageStyle.css">
+    <link rel="shortcut icon" href="logo.jpg" />
+
+    <!-- jQuery stuff. Only used for the animation speed slider. -->
+    <link rel="stylesheet" href="ThirdParty/jquery-ui-1.8.11.custom.css">
+    <script src="ThirdParty/jquery-1.5.2.min.js"></script>
+    <script src="ThirdParty/jquery-ui-1.8.11.custom.min.js"></script>
+
+    <!-- JavaScript for the actual visualization code -->
+    <script type="text/javascript" src="AnimationLibrary/CustomEvents.js"></script>
+    <script type="text/javascript" src="AnimationLibrary/UndoFunctions.js"></script>
+    <script type="text/javascript" src="AnimationLibrary/AnimatedObject.js"></script>
+    <script type="text/javascript" src="AnimationLibrary/AnimatedLabel.js"></script>
+    <script type="text/javascript" src="AnimationLibrary/AnimatedCircle.js"></script>
+    <script type="text/javascript" src="AnimationLibrary/AnimatedRectangle.js"></script>
+    <script type="text/javascript" src="AnimationLibrary/AnimatedLinkedList.js"></script>
+    <script type="text/javascript" src="AnimationLibrary/HighlightCircle.js"></script>
+    <script type="text/javascript" src="AnimationLibrary/Line.js"></script>
+    <script type="text/javascript" src="AnimationLibrary/ObjectManager.js"></script>
+    <script type="text/javascript" src="AnimationLibrary/AnimationMain.js"></script>
+    <script type="text/javascript" src="AlgorithmLibrary/Algorithm.js"></script>
+    <script type="text/javascript" src="AlgorithmLibrary/AVL.js"></script>
+
+
+<script>
+	const bstSnippets = {
+		'c': `
+typedef struct Node {
+    int data;
+    struct Node* left;
+    struct Node* right;
+    int height;
+} Node;
+
+Node* createNode(int key) {
+    Node* newNode = (Node*)malloc(sizeof(Node));
+    newNode->data = key;
+    newNode->left = newNode->right = NULL;
+    newNode->height = 1;
+    return newNode;
+}
+
+Node* rightRotate(Node* y) {
+    Node* x = y->left;
+    Node* T2 = x->right;
+    x->right = y;
+    y->left = T2;
+    y->height = 1 + fmax(height(y->left), height(y->right));
+    x->height = 1 + fmax(height(x->left), height(x->right));
+    return x;
+}
+
+Node* leftRotate(Node* x) {
+    Node* y = x->right;
+    Node* T2 = y->left;
+    y->left = x;
+    x->right = T2;
+    x->height = 1 + fmax(height(x->left), height(x->right));
+    y->height = 1 + fmax(height(y->left), height(y->right));
+    return y;
+}
+
+int height(Node* N) {
+    return N ? N->height : 0;
+}
+
+int getBalance(Node* N) {
+    return N ? height(N->left) - height(N->right) : 0;
+}
+
+Node* insert(Node* node, int key) {
+    if (!node) return createNode(key);
+    if (key < node->data)
+        node->left = insert(node->left, key);
+    else if (key > node->data)
+        node->right = insert(node->right, key);
+    else
+        return node; // Duplicates are not allowed
+    node->height = 1 + fmax(height(node->left), height(node->right));
+    int balance = getBalance(node);
+
+    // Left Left
+    if (balance > 1 && key < node->left->data)
+        return rightRotate(node);
+
+    // Right Right
+    if (balance < -1 && key > node->right->data)
+        return leftRotate(node);
+
+    // Left Right
+    if (balance > 1 && key > node->left->data) {
+        node->left = leftRotate(node->left);
+        return rightRotate(node);
+    }
+
+    // Right Left
+    if (balance < -1 && key < node->right->data) {
+        node->right = rightRotate(node->right);
+        return leftRotate(node);
+    }
+
+    return node;
+}
+
+		`,
+		'cpp': `
+struct Node {
+    int data;
+    Node* left;
+    Node* right;
+    int height;
+    
+    Node(int val) : data(val), left(nullptr), right(nullptr), height(1) {}
+};
+
+int height(Node* N) {
+    return N ? N->height : 0;
+}
+
+int getBalance(Node* N) {
+    return N ? height(N->left) - height(N->right) : 0;
+}
+
+Node* rightRotate(Node* y) {
+    Node* x = y->left;
+    Node* T2 = x->right;
+    x->right = y;
+    y->left = T2;
+    y->height = 1 + max(height(y->left), height(y->right));
+    x->height = 1 + max(height(x->left), height(x->right));
+    return x;
+}
+
+Node* leftRotate(Node* x) {
+    Node* y = x->right;
+    Node* T2 = y->left;
+    y->left = x;
+    x->right = T2;
+    x->height = 1 + max(height(x->left), height(x->right));
+    y->height = 1 + max(height(y->left), height(y->right));
+    return y;
+}
+
+Node* insert(Node* node, int key) {
+    if (!node) return new Node(key);
+    if (key < node->data)
+        node->left = insert(node->left, key);
+    else if (key > node->data)
+        node->right = insert(node->right, key);
+    else
+        return node;
+    node->height = 1 + max(height(node->left), height(node->right));
+    int balance = getBalance(node);
+
+    if (balance > 1 && key < node->left->data)
+        return rightRotate(node);
+    if (balance < -1 && key > node->right->data)
+        return leftRotate(node);
+    if (balance > 1 && key > node->left->data) {
+        node->left = leftRotate(node->left);
+        return rightRotate(node);
+    }
+    if (balance < -1 && key < node->right->data) {
+        node->right = rightRotate(node->right);
+        return leftRotate(node);
+    }
+    return node;
+}
+
+		`,
+		'python': `
+class Node:
+    def __init__(self, key):
+        self.key = key
+        self.left = None
+        self.right = None
+        self.height = 1
+
+def height(node):
+    return node.height if node else 0
+
+def get_balance(node):
+    return height(node.left) - height(node.right)
+
+def right_rotate(y):
+    x = y.left
+    T = x.right
+    x.right = y
+    y.left = T
+    y.height = 1 + max(height(y.left), height(y.right))
+    x.height = 1 + max(height(x.left), height(x.right))
+    return x
+
+def left_rotate(x):
+    y = x.right
+    T = y.left
+    y.left = x
+    x.right = T
+    x.height = 1 + max(height(x.left), height(x.right))
+    y.height = 1 + max(height(y.left), height(y.right))
+    return y
+
+def insert(root, key):
+    if not root:
+        return Node(key)
+    if key < root.key:
+        root.left = insert(root.left, key)
+    elif key > root.key:
+        root.right = insert(root.right, key)
+    else:
+        return root  # Duplicate keys are not allowed
+
+    root.height = 1 + max(height(root.left), height(root.right))
+    balance = get_balance(root)
+
+    # Left Left Case
+    if balance > 1 and key < root.left.key:
+        return right_rotate(root)
+    # Right Right Case
+    if balance < -1 and key > root.right.key:
+        return left_rotate(root)
+    # Left Right Case
+    if balance > 1 and key > root.left.key:
+        root.left = left_rotate(root.left)
+        return right_rotate(root)
+    # Right Left Case
+    if balance < -1 and key < root.right.key:
+        root.right = right_rotate(root.right)
+        return left_rotate(root)
+
+    return root
+
+		`,
+		'java': `
+class Node {
+    int key;
+    Node left, right;
+    int height;
+
+    Node(int d) {
+        key = d;
+        left = right = null;
+        height = 1;
+    }
+}
+
+class AVLTree {
+
+    int height(Node N) {
+        return (N == null) ? 0 : N.height;
+    }
+
+    int getBalance(Node N) {
+        return (N == null) ? 0 : height(N.left) - height(N.right);
+    }
+
+    Node rightRotate(Node y) {
+        Node x = y.left;
+        Node T = x.right;
+
+        x.right = y;
+        y.left = T;
+
+        y.height = Math.max(height(y.left), height(y.right)) + 1;
+        x.height = Math.max(height(x.left), height(x.right)) + 1;
+
+        return x;
+    }
+
+    Node leftRotate(Node x) {
+        Node y = x.right;
+        Node T = y.left;
+
+        y.left = x;
+        x.right = T;
+
+        x.height = Math.max(height(x.left), height(x.right)) + 1;
+        y.height = Math.max(height(y.left), height(y.right)) + 1;
+
+        return y;
+    }
+
+    Node insert(Node node, int key) {
+        if (node == null)
+            return (new Node(key));
+
+        if (key < node.key)
+            node.left = insert(node.left, key);
+        else if (key > node.key)
+            node.right = insert(node.right, key);
+        else
+            return node; // Duplicate keys are not allowed
+
+        node.height = 1 + Math.max(height(node.left), height(node.right));
+
+        int balance = getBalance(node);
+
+        // Left Left Case
+        if (balance > 1 && key < node.left.key)
+            return rightRotate(node);
+
+        // Right Right Case
+        if (balance < -1 && key > node.right.key)
+            return leftRotate(node);
+
+        // Left Right Case
+        if (balance > 1 && key > node.left.key) {
+            node.left = leftRotate(node.left);
+            return rightRotate(node);
+        }
+
+        // Right Left Case
+        if (balance < -1 && key < node.right.key) {
+            node.right = rightRotate(node.right);
+            return leftRotate(node);
+        }
+
+        return node;
+    }
+
+    void printTree(Node root) {
+        if (root != null) {
+            printTree(root.left);
+            System.out.print(root.key + " ");
+            printTree(root.right);
+        }
+    }
+}
+		`,
+		'javascript': `
+class Node {
+    constructor(key) {
+        this.key = key;
+        this.left = null;
+        this.right = null;
+        this.height = 1;
+    }
+}
+
+class AVLTree {
+
+    height(node) {
+        return node ? node.height : 0;
+    }
+
+    getBalance(node) {
+        return node ? this.height(node.left) - this.height(node.right) : 0;
+    }
+
+    rightRotate(y) {
+        let x = y.left;
+        let T = x.right;
+
+        x.right = y;
+        y.left = T;
+
+        y.height = Math.max(this.height(y.left), this.height(y.right)) + 1;
+        x.height = Math.max(this.height(x.left), this.height(x.right)) + 1;
+
+        return x;
+    }
+
+    leftRotate(x) {
+        let y = x.right;
+        let T = y.left;
+
+        y.left = x;
+        x.right = T;
+
+        x.height = Math.max(this.height(x.left), this.height(x.right)) + 1;
+        y.height = Math.max(this.height(y.left), this.height(y.right)) + 1;
+
+        return y;
+    }
+
+    insert(root, key) {
+        if (!root) return new Node(key);
+
+        if (key < root.key)
+            root.left = this.insert(root.left, key);
+        else if (key > root.key)
+            root.right = this.insert(root.right, key);
+
+        root.height = 1 + Math.max(this.height(root.left), this.height(root.right));
+
+        let balance = this.getBalance(root);
+
+        if (balance > 1 && key < root.left.key)
+            return this.rightRotate(root);
+
+        if (balance < -1 && key > root.right.key)
+            return this.leftRotate(root);
+
+        if (balance > 1 && key > root.left.key) {
+            root.left = this.leftRotate(root.left);
+            return this.rightRotate(root);
+        }
+
+        if (balance < -1 && key < root.right.key) {
+            root.right = this.rightRotate(root.right);
+            return this.leftRotate(root);
+        }
+
+        return root;
+    }
+
+    printTree(root) {
+        if (root) {
+            this.printTree(root.left);
+            console.log(root.key);
+            this.printTree(root.right);
+        }
+    }
+}
+
+		`
+	};
+	
+			let selectedLanguage = 'javascript';
+	
+			function updateCodeDisplay() {
+				document.getElementById('codeDisplay').innerText = bstSnippets[selectedLanguage];
+			}
+	
+			function changeLanguage(language) {
+				selectedLanguage = language;
+				updateCodeDisplay();
+			}
+	
+			updateCodeDisplay();
+</script>
+	</head>
+</head>
+
+<body onload="init();" class="VisualizationMainPage">
+    <div id="container">
+        <div id="header">
+            <h1>AVL Tree</h1>
+
+            <!-- Dropdown button at the upper right corner -->
+            <div class="dropdown" style="position: absolute; top: 10px; right: 20px;">
+                <button class="dropbtn">AVL Tree Info</button>
+                <div class="dropdown-content" style="right: 0;">
+                    <b>AVL Tree:</b><br>
+                    - Time Complexity:<br>
+                    &nbsp;&nbsp;&nbsp; * Search: O(log N)<br>
+                    &nbsp;&nbsp;&nbsp; * Insertion: O(log N)<br>
+                    &nbsp;&nbsp;&nbsp; * Deletion: O(log N)<br><br>
+
+                    <label for="language">Choose Language:</label>
+						<select id="language" onchange="changeLanguage(this.value)">
+							<option value="c">C</option>
+							<option value="cpp">C++</option>
+							<option value="python">Python</option>
+							<option value="java">Java</option>
+							<option value="javascript" selected>JavaScript</option>
+						</select><br>
+	
+						<b>AVLTree Code:</b><br>
+						<pre id="codeDisplay">
+	Choose a language to see code here.
+						</pre>
+                </div>
+            </div>
+        </div>
+
+        <div id="mainContent">
+            <div id="algoControlSection">
+                <!-- Table for buttons to control specific animation (insert/find/etc.) -->
+                <table id="AlgorithmSpecificControls"></table>
+            </div>
+
+            <!-- Drawing canvas where all animation is done -->
+            <canvas id="canvas" width="1000" height="500"></canvas>
+
+            <div id="generalAnimationControlSection">
+                <!-- Table for buttons to control general animation (play/pause/undo/etc) -->
+                <table id="GeneralAnimationControls"></table>
+            </div>
+        </div> <!-- mainContent -->
+
+        <div id="footer">
+            <p><a href="index.html">DSA Dazzle</a></p>
+        </div>
+    </div><!-- container -->
+</body>
+</html>

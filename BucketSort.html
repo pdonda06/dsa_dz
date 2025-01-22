@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Bucket Sort Visualization</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="visualizationPageStyle.css">
+    <link rel="shortcut icon" href="logo.jpg" />
+
+    <!-- jQuery for better handling -->
+    <link rel="stylesheet" href="ThirdParty/jquery-ui-1.8.11.custom.css">
+    <script src="ThirdParty/jquery-1.5.2.min.js"></script>
+    <script src="ThirdParty/jquery-ui-1.8.11.custom.min.js"></script>
+
+    <!-- JavaScript -->
+    <script type="text/javascript" src="AnimationLibrary/CustomEvents.js"></script>
+    <script type="text/javascript" src="AnimationLibrary/UndoFunctions.js"></script>
+    <script type="text/javascript" src="AnimationLibrary/AnimatedObject.js"></script>
+    <script type="text/javascript" src="AnimationLibrary/AnimatedLabel.js"></script>
+    <script type="text/javascript" src="AnimationLibrary/AnimatedCircle.js"></script>
+    <script type="text/javascript" src="AnimationLibrary/AnimatedRectangle.js"></script>
+    <script type="text/javascript" src="AnimationLibrary/AnimatedLinkedList.js"></script>
+    <script type="text/javascript" src="AnimationLibrary/HighlightCircle.js"></script>
+    <script type="text/javascript" src="AnimationLibrary/Line.js"></script>
+    <script type="text/javascript" src="AnimationLibrary/ObjectManager.js"></script>
+    <script type="text/javascript" src="AnimationLibrary/AnimationMain.js"></script>
+    <script type="text/javascript" src="AlgorithmLibrary/Algorithm.js"></script>
+    <script type="text/javascript" src="AlgorithmLibrary/BucketSort.js"></script>
+
+</head>
+
+<body onload="init();" class="VisualizationMainPage">
+
+    <div id="container">
+
+        <div id="header">
+            <h1>Bucket Sort</h1>
+
+            <!-- Dropdown for Bucket Sort Info -->
+            <div class="dropdown" style="position: absolute; top: 10px; right: 20px;">
+                <button class="dropbtn">Bucket Sort Info</button>
+                <div class="dropdown-content" style="right: 0;">
+                    <b>Bucket Sort:</b><br>
+                    - Time Complexity:<br>
+                    &nbsp;&nbsp;&nbsp; * Average: O(n + k)<br>
+                    &nbsp;&nbsp;&nbsp; * Worst: O(n²)<br>
+                    where n is the number of elements and k is the number of buckets.<br><br>
+
+                    <!-- Language Selection Dropdown -->
+                    <label for="language">Choose Language:</label>
+                    <select id="language" onchange="changeLanguage(this.value)">
+                        <option value="c">C</option>
+                        <option value="cpp">C++</option>
+                        <option value="python">Python</option>
+                        <option value="java">Java</option>
+                        <option value="javascript" selected>JavaScript</option>
+                    </select>
+
+                    <b>Bucket Sort Code:</b><br>
+                    <pre id="codeDisplay">
+Choose a language to see code here.
+                    </pre>
+                </div>
+            </div>
+        </div>
+
+        <div id="mainContent">
+
+            <div id="algoControlSection">
+                <!-- Table for buttons to control specific animation (insert/find/etc) -->
+                <table id="AlgorithmSpecificControls"></table>
+            </div>
+
+            <!-- Drawing canvas where all animation is done -->
+            <canvas id="canvas" width="1000" height="500"></canvas>
+
+            <div id="generalAnimationControlSection">
+                <!-- Table for buttons to control general animation (play/pause/undo/etc) -->
+                <table id="GeneralAnimationControls"></table>
+            </div>
+        </div> <!-- mainContent -->
+
+        <div id="footer">
+            <p><a href="index.html">DSA Dazzle</a></p>
+        </div>
+    </div><!-- container -->
+
+    <script type="text/javascript">
+        let selectedLanguage = 'javascript';
+        
+        // Function to update the code display based on the selected language
+        function updateCodeDisplay() {
+            document.getElementById('codeDisplay').innerText = getBucketSortCodeSnippet(selectedLanguage);
+        }
+        
+        // Function to change the selected language
+        function changeLanguage(language) {
+            selectedLanguage = language;
+            updateCodeDisplay();
+        }
+        
+        // Function to return Bucket Sort code snippets based on language
+        function getBucketSortCodeSnippet(language) {
+            const codeSnippets = {
+'c': `
+    #include <stdio.h>
+    void bucketSort(int arr[], int n) {
+        int i, j;
+        int numBuckets = 5;
+        int buckets[numBuckets][10] = {0};
+
+        for (i = 0; i < n; i++) {
+            int bucketIndex = arr[i] / numBuckets;
+            buckets[bucketIndex][i] = arr[i];
+        }
+
+        for (i = 0; i < numBuckets; i++) {
+            for (j = 0; j < 10; j++) {
+                if (buckets[i][j] != 0) {
+                    printf("%d ", buckets[i][j]);
+                }
+            }
+        }
+    }
+                `,
+'c++': `
+    #include <iostream>
+    using namespace std;
+    void bucketSort(vector<int>& arr) {
+        int numBuckets = 5;
+        vector<int> buckets[numBuckets];
+
+        for (int i = 0; i < arr.size(); i++) {
+            int bucketIndex = arr[i] / numBuckets;
+            buckets[bucketIndex].push_back(arr[i]);
+        }
+
+        for (int i = 0; i < numBuckets; i++) {
+            sort(buckets[i].begin(), buckets[i].end());
+            for (int j = 0; j < buckets[i].size(); j++) {
+                cout << buckets[i][j] << " ";
+            }
+        }
+    }
+                `,
+'java': `
+    public class BucketSort {
+        public static void bucketSort(int[] arr) {
+            int numBuckets = 5;
+            int[][] buckets = new int[numBuckets][arr.length];
+
+            for (int i = 0; i < arr.length; i++) {
+                int bucketIndex = arr[i] / numBuckets;
+                buckets[bucketIndex][i] = arr[i];
+            }
+
+            for (int i = 0; i < numBuckets; i++) {
+                Arrays.sort(buckets[i]);
+                for (int j = 0; j < buckets[i].length; j++) {
+                    System.out.print(buckets[i][j] + " ");
+                }
+            }
+        }
+    }
+                `,
+'python': `
+    def bucket_sort(arr):
+        num_buckets = 5
+        buckets = [[] for _ in range(num_buckets)]
+
+        for num in arr:
+            bucket_index = num // num_buckets
+            buckets[bucket_index].append(num)
+
+        for b in buckets:
+            b.sort()
+            print(*b)
+                `,
+'javascript': `
+    function bucketSort(arr) {
+        const numBuckets = 5;
+        const buckets = Array.from({length: numBuckets}, () => []);
+
+        arr.forEach(num => {
+            const bucketIndex = Math.floor(num / numBuckets);
+            buckets[bucketIndex].push(num);
+        });
+
+        buckets.forEach(bucket => {
+            bucket.sort((a, b) => a - b);
+            console.log(...bucket);
+        });
+    }
+                `
+            };
+            return codeSnippets[language];
+        }
+        
+        // Initialize the display with default language
+        updateCodeDisplay();
+    </script>
+</body>
+</html>

@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>
+        Array Stack Visualization 
+    </title>
+
+    <!-- CSS sheet for how the page is laid out -->
+    <link rel="stylesheet" href="visualizationPageStyle.css">
+    <link rel="shortcut icon" href="logo.jpg" />
+
+    <!-- jQuery stuff. Only used for the animation speed slider. -->
+    <link rel="stylesheet" href="ThirdParty/jquery-ui-1.8.11.custom.css">
+    <script src="ThirdParty/jquery-1.5.2.min.js"></script>
+    <script src="ThirdParty/jquery-ui-1.8.11.custom.min.js"></script>
+
+    <!-- JavaScript for the actual visualization code -->
+    <script type="application/javascript" src="AnimationLibrary/CustomEvents.js"></script>
+    <script type="application/javascript" src="AnimationLibrary/UndoFunctions.js"></script>
+    <script type="application/javascript" src="AnimationLibrary/AnimatedObject.js"></script>
+    <script type="application/javascript" src="AnimationLibrary/AnimatedLabel.js"></script>
+    <script type="application/javascript" src="AnimationLibrary/AnimatedCircle.js"></script>
+    <script type="application/javascript" src="AnimationLibrary/AnimatedRectangle.js"></script>
+    <script type="application/javascript" src="AnimationLibrary/AnimatedLinkedList.js"></script>
+    <script type="application/javascript" src="AnimationLibrary/HighlightCircle.js"></script>
+    <script type="application/javascript" src="AnimationLibrary/Line.js"></script>
+    <script type="application/javascript" src="AnimationLibrary/ObjectManager.js"></script>
+    <script type="application/javascript" src="AnimationLibrary/AnimationMain.js"></script>
+
+    <script type="application/javascript" src="AlgorithmLibrary/Algorithm.js"></script>
+    <script type="application/javascript" src="AlgorithmLibrary/StackArray.js"></script>
+
+<script>
+
+    const stackSnippets = {
+        'c': {
+            'push': `
+    void push(int stack[], int *top, int value) {
+        stack[++(*top)] = value;
+    }
+            `,
+            'pop': `
+    int pop(int stack[], int *top) {
+        if (*top == -1) return -1; // Stack is empty
+        return stack[(*top)--];
+    }
+            `,
+            'peek': `
+    int peek(int stack[], int top) {
+        if (top == -1) return -1; // Stack is empty
+        return stack[top];
+    }
+            `,
+            'print': `
+    void printStack(int stack[], int top) {
+        for (int i = 0; i <= top; i++) {
+            printf("%d ", stack[i]);
+        }
+        printf("\\n");
+    }
+            `
+        },
+        'cpp': {
+            'push': `
+    void push(std::vector<int> &stack, int value) {
+        stack.push_back(value);
+    }
+            `,
+            'pop': `
+    int pop(std::vector<int> &stack) {
+        if (stack.empty()) return -1; // Stack is empty
+        int value = stack.back();
+        stack.pop_back();
+        return value;
+    }
+            `,
+            'peek': `
+    int peek(const std::vector<int> &stack) {
+        if (stack.empty()) return -1; // Stack is empty
+        return stack.back();
+    }
+            `,
+            'print': `
+    void printStack(const std::vector<int> &stack) {
+        for (int value : stack) {
+            std::cout << value << " ";
+        }
+        std::cout << std::endl;
+    }
+            `
+        },
+        'python': {
+            'push': `
+    def push(stack, value):
+        stack.append(value)
+            `,
+            'pop': `
+    def pop(stack):
+        if not stack:
+            return -1 # Stack is empty
+        return stack.pop()
+            `,
+            'peek': `
+    def peek(stack):
+        if not stack:
+            return -1 # Stack is empty
+        return stack[-1]
+            `,
+            'print': `
+    def print_stack(stack):
+        print(" ".join(map(str, stack)))
+            `
+        },
+        'java': {
+            'push': `
+    public void push(int[] stack, int value, int top) {
+        stack[++top] = value;
+    }
+            `,
+            'pop': `
+    public int pop(int[] stack, int top) {
+        if (top == -1) return -1; // Stack is empty
+        return stack[top--];
+    }
+            `,
+            'peek': `
+    public int peek(int[] stack, int top) {
+        if (top == -1) return -1; // Stack is empty
+        return stack[top];
+    }
+            `,
+            'print': `
+    public void printStack(int[] stack, int top) {
+        for (int i = 0; i <= top; i++) {
+            System.out.print(stack[i] + " ");
+        }
+        System.out.println();
+    }
+            `
+        },
+        'javascript': {
+            'push': `
+    function push(stack, value) {
+        stack.push(value);
+    }
+            `,
+            'pop': `
+    function pop(stack) {
+        if (stack.length === 0) return -1; // Stack is empty
+        return stack.pop();
+    }
+            `,
+            'peek': `
+    function peek(stack) {
+        if (stack.length === 0) return -1; // Stack is empty
+        return stack[stack.length - 1];
+    }
+            `,
+            'print': `
+    function printStack(stack) {
+        console.log(stack.join(' '));
+    }
+            `
+        }
+    };
+    
+    let selectedLanguage = 'javascript';
+    let selectedOperation = 'push';
+    
+    function updateCodeDisplay() {
+        document.getElementById('codeDisplay').innerText = stackSnippets[selectedLanguage][selectedOperation];
+    }
+    
+    function changeLanguage(language) {
+        selectedLanguage = language;
+        updateCodeDisplay();
+    }
+    
+    function changeOperation(operation) {
+        selectedOperation = operation;
+        updateCodeDisplay();
+    }
+    
+    updateCodeDisplay();
+    
+</script>
+
+
+
+</head>
+
+<body onload="init();" class="VisualizationMainPage">
+    <div id="container">
+        <div id="header">
+            <h1>Stack (Array Implementation)</h1>
+
+            <!-- Dropdown button at the upper right corner -->
+            <div class="dropdown" style="position: absolute; top: 10px; right: 20px;">
+                <button class="dropbtn">Stack Info</button>
+                <div class="dropdown-content" style="right: 0;">
+                    <b>Stack:</b><br>
+                    - Time Complexity:<br>
+                    &nbsp;&nbsp;&nbsp; * Push: O(1)<br>
+                    &nbsp;&nbsp;&nbsp; * Pop: O(1)<br>
+                    &nbsp;&nbsp;&nbsp; * Peek: O(1)<br>
+                    where n is the number of elements in the stack.<br><br>
+                    
+                    <label for="language">Choose Language:</label>
+                    <select id="language" onchange="changeLanguage(this.value)">
+                        <option value="c">C</option>
+                        <option value="cpp">C++</option>
+                        <option value="python">Python</option>
+                        <option value="java">Java</option>
+                        <option value="javascript" selected>JavaScript</option>
+                    </select>
+
+                    <label for="operation">Choose Operation:</label>
+                    <select id="operation" onchange="changeOperation(this.value)">
+                        <option value="push">Push</option>
+                        <option value="pop">Pop</option>
+                        <option value="peek">Peek</option>
+                        <option value="print">Print</option>
+                    </select><br>
+
+                    <b>Stack Code:</b><br>
+                    <pre id="codeDisplay">
+Choose a language and operation to see code here.
+                    </pre>
+                </div>
+            </div>
+        </div>
+
+        <div id="mainContent">
+            <div id="algoControlSection">
+                <!-- Table for buttons to control specific animation (push/pop/etc.) -->
+                <table id="AlgorithmSpecificControls"></table>
+            </div>
+
+            <!-- Drawing canvas where all animation is done -->
+            <canvas id="canvas" width="1000" height="500"></canvas>
+
+            <div id="generalAnimationControlSection">
+                <!-- Table for buttons to control general animation (play/pause/undo/etc) -->
+                <table id="GeneralAnimationControls"></table>
+            </div>
+        </div> <!-- mainContent -->
+
+        <div id="footer">
+            <p><a href="index.html">DSA Dazzle</a></p>
+        </div>
+    </div><!-- container -->
+</body>
+
+</html>

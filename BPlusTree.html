@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>B+ Tree Visualization</title>
+
+    <!-- CSS sheet for how the page is laid out -->
+    <link rel="stylesheet" href="visualizationPageStyle.css">
+    <link rel="shortcut icon" href="logo.jpg" />
+
+    <!-- jQuery stuff. Only used for the animation speed slider. -->
+    <link rel="stylesheet" href="ThirdParty/jquery-ui-1.8.11.custom.css">
+    <script src="ThirdParty/jquery-1.5.2.min.js"></script>
+    <script src="ThirdParty/jquery-ui-1.8.11.custom.min.js"></script>
+
+    <!-- JavaScript for the actual visualization code -->
+    <script type="text/javascript" src="AnimationLibrary/CustomEvents.js"></script>
+    <script type="text/javascript" src="AnimationLibrary/UndoFunctions.js"></script>
+    <script type="text/javascript" src="AnimationLibrary/AnimatedObject.js"></script>
+    <script type="text/javascript" src="AnimationLibrary/AnimatedLabel.js"></script>
+    <script type="text/javascript" src="AnimationLibrary/AnimatedCircle.js"></script>
+    <script type="text/javascript" src="AnimationLibrary/AnimatedRectangle.js"></script>
+    <script type="text/javascript" src="AnimationLibrary/AnimatedLinkedList.js"></script>
+    <script type="text/javascript" src="AnimationLibrary/AnimatedBTreeNode.js"></script>
+    <script type="text/javascript" src="AnimationLibrary/HighlightCircle.js"></script>
+    <script type="text/javascript" src="AnimationLibrary/Line.js"></script>
+    <script type="text/javascript" src="AnimationLibrary/ObjectManager.js"></script>
+    <script type="text/javascript" src="AnimationLibrary/AnimationMain.js"></script>
+    <script type="text/javascript" src="AlgorithmLibrary/Algorithm.js"></script>
+    <script type="text/javascript" src="AlgorithmLibrary/BPlusTree.js"></script>
+<script>
+    const codeSnippets = {
+    'c': {
+        'insert': `
+void insert(BTreeNode *root, int key) {
+    if (root->isFull()) {
+        BTreeNode *newRoot = new BTreeNode();
+        newRoot->children[0] = root;
+        newRoot->splitChild(0);
+        newRoot->insertNonFull(key);
+        root = newRoot;
+    } else {
+        root->insertNonFull(key);
+    }
+}
+        `,
+        'delete': `
+void deleteNode(BTreeNode *root, int key) {
+    if (!root) return;
+    root->deleteKey(key);
+    if (root->isEmpty()) {
+        BTreeNode *oldRoot = root;
+        root = root->children[0];
+        delete oldRoot;
+    }
+}
+        `,
+        'find': `
+bool find(BTreeNode *root, int key) {
+    if (!root) return false;
+    return root->searchKey(key);
+}
+        `,
+        'print': `
+void printTree(BTreeNode *root) {
+    if (!root) return;
+    for (int i = 0; i < root->numKeys; i++) {
+        printf("%d ", root->keys[i]);
+    }
+    if (!root->isLeaf) {
+        for (int i = 0; i <= root->numKeys; i++) {
+            printTree(root->children[i]);
+        }
+    }
+}
+        `
+    },
+    'cpp': {
+        'insert': `
+BTreeNode* insert(BTreeNode *root, int key) {
+    if (root->isFull()) {
+        BTreeNode *newRoot = new BTreeNode(false);
+        newRoot->children[0] = root;
+        newRoot->splitChild(0);
+        newRoot->insertNonFull(key);
+        return newRoot;
+    } else {
+        root->insertNonFull(key);
+    }
+    return root;
+}
+        `,
+        'delete': `
+BTreeNode* deleteNode(BTreeNode *root, int key) {
+    root->deleteKey(key);
+    if (root->isEmpty()) {
+        BTreeNode *newRoot = root->children[0];
+        delete root;
+        return newRoot;
+    }
+    return root;
+}
+        `,
+        'find': `
+bool find(BTreeNode *root, int key) {
+    if (!root) return false;
+    return root->searchKey(key);
+}
+        `,
+        'print': `
+void printTree(BTreeNode *root) {
+    if (!root) return;
+    root->printKeys();
+    for (int i = 0; i <= root->numChildren; i++) {
+        printTree(root->children[i]);
+    }
+}
+        `
+    },
+    'python': {
+        'insert': `
+def insert(root, key):
+    if root.is_full():
+        new_root = BTreeNode(False)
+        new_root.children[0] = root
+        new_root.split_child(0)
+        new_root.insert_non_full(key)
+        return new_root
+    else:
+        root.insert_non_full(key)
+    return root
+        `,
+        'delete': `
+def delete(root, key):
+    root.delete_key(key)
+    if root.is_empty():
+        root = root.children[0] if root.children else None
+    return root
+        `,
+        'find': `
+def find(root, key):
+    if not root:
+        return False
+    return root.search_key(key)
+        `,
+        'print': `
+def print_tree(root):
+    if not root:
+        return
+    for key in root.keys:
+        print(key, end=" ")
+    for child in root.children:
+        print_tree(child)
+        `
+    },
+    'java': {
+        'insert': `
+public BTreeNode insert(BTreeNode root, int key) {
+    if (root.isFull()) {
+        BTreeNode newRoot = new BTreeNode(false);
+        newRoot.children[0] = root;
+        newRoot.splitChild(0);
+        newRoot.insertNonFull(key);
+        return newRoot;
+    } else {
+        root.insertNonFull(key);
+    }
+    return root;
+}
+        `,
+        'delete': `
+public BTreeNode delete(BTreeNode root, int key) {
+    root.deleteKey(key);
+    if (root.isEmpty()) {
+        BTreeNode newRoot = root.children[0];
+        root = null;
+        return newRoot;
+    }
+    return root;
+}
+        `,
+        'find': `
+public boolean find(BTreeNode root, int key) {
+    if (root == null) return false;
+    return root.searchKey(key);
+}
+        `,
+        'print': `
+public void printTree(BTreeNode root) {
+    if (root == null) return;
+    root.printKeys();
+    for (BTreeNode child : root.children) {
+        printTree(child);
+    }
+}
+        `
+    },
+    'javascript': {
+        'insert': `
+function insert(root, key) {
+    if (root.isFull()) {
+        let newRoot = new BTreeNode(false);
+        newRoot.children[0] = root;
+        newRoot.splitChild(0);
+        newRoot.insertNonFull(key);
+        return newRoot;
+    } else {
+        root.insertNonFull(key);
+    }
+    return root;
+}
+        `,
+        'delete': `
+function deleteNode(root, key) {
+    root.deleteKey(key);
+    if (root.isEmpty()) {
+        root = root.children[0] || null;
+    }
+    return root;
+}
+        `,
+        'find': `
+function find(root, key) {
+    if (!root) return false;
+    return root.searchKey(key);
+}
+        `,
+        'print': `
+function printTree(root) {
+    if (!root) return;
+    console.log(root.keys);
+    root.children.forEach(child => printTree(child));
+}
+        `
+    }
+};
+
+// Initial selected values for language and operation
+let selectedLanguage = 'javascript';
+let selectedOperation = 'insert';
+
+// Update code display based on selected language and operation
+function updateCodeDisplay() {
+    document.getElementById('codeDisplay').innerText = codeSnippets[selectedLanguage][selectedOperation];
+}
+
+// Change the language and update display
+function changeLanguage(language) {
+    selectedLanguage = language;
+    updateCodeDisplay();
+}
+
+// Change the operation and update display
+function changeOperation(operation) {
+    selectedOperation = operation;
+    updateCodeDisplay();
+}
+
+updateCodeDisplay();
+
+</script>
+</head>
+<body onload="init();" class="VisualizationMainPage">
+    <div id="container">
+        <div id="header">
+            <h1>B+ Trees</h1>
+
+            <!-- Dropdown button at the upper right corner -->
+            <div class="dropdown" style="position: absolute; top: 10px; right: 20px;">
+                <button class="dropbtn">B+ Tree Info</button>
+                <div class="dropdown-content" style="right: 0;">
+                    <b>B+ Tree:</b><br>
+                    - Time Complexity:<br>
+                    &nbsp;&nbsp;&nbsp; * Search: O(log n)<br>
+                    &nbsp;&nbsp;&nbsp; * Insertion: O(log n)<br>
+                    &nbsp;&nbsp;&nbsp; * Deletion: O(log n)<br>
+                    where n is the number of keys in the tree.<br><br>
+                    
+                    <label for="language">Choose Language:</label>
+                    <select id="language" onchange="changeLanguage(this.value)">
+                        <option value="c">C</option>
+                        <option value="cpp">C++</option>
+                        <option value="python">Python</option>
+                        <option value="java">Java</option>
+                        <option value="javascript" selected>JavaScript</option>
+                    </select>
+
+                    <label for="operation">Choose Operation:</label>
+                    <select id="operation" onchange="changeOperation(this.value)">
+                        <option value="insert">Insert</option>
+                        <option value="delete">Delete</option>
+                        <option value="find">Find</option>
+                        <option value="print">Print</option>
+                    </select><br>
+
+                    <b>B+ Tree Code:</b><br>
+                    <pre id="codeDisplay">
+Choose a language and operation to see code here.
+                    </pre>
+                </div>
+            </div>
+        </div>
+
+        <div id="mainContent">
+            <div id="algoControlSection">
+                <table id="AlgorithmSpecificControls"></table>
+            </div>
+
+            <!-- Drawing canvas for animation -->
+            <canvas id="canvas" width="1000" height="500"></canvas>
+
+            <div id="generalAnimationControlSection">
+                <table id="GeneralAnimationControls"></table>
+            </div>
+        </div>
+
+        <div id="footer">
+            <p><a href="index.html">DSA Dazzle</a></p>
+        </div>
+    </div>
+</body>
+</html>

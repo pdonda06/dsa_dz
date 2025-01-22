@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Binomial Queue Visualization</title>
+
+    <!-- CSS sheet for how the page is laid out -->
+    <link rel="stylesheet" href="visualizationPageStyle.css">
+    <link rel="shortcut icon" href="logo.jpg" />
+
+    <!-- jQuery stuff. Only used for the animation speed slider. -->
+    <link rel="stylesheet" href="ThirdParty/jquery-ui-1.8.11.custom.css">
+    <script src="ThirdParty/jquery-1.5.2.min.js"></script>
+    <script src="ThirdParty/jquery-ui-1.8.11.custom.min.js"></script>
+
+    <!-- JavaScript for the actual visualization code -->
+    <script type="text/javascript" src="AnimationLibrary/CustomEvents.js"></script>
+    <script type="text/javascript" src="AnimationLibrary/UndoFunctions.js"></script>
+    <script type="text/javascript" src="AnimationLibrary/AnimatedObject.js"></script>
+    <script type="text/javascript" src="AnimationLibrary/AnimatedLabel.js"></script>
+    <script type="text/javascript" src="AnimationLibrary/AnimatedCircle.js"></script>
+    <script type="text/javascript" src="AnimationLibrary/AnimatedRectangle.js"></script>
+    <script type="text/javascript" src="AnimationLibrary/AnimatedLinkedList.js"></script>
+    <script type="text/javascript" src="AnimationLibrary/HighlightCircle.js"></script>
+    <script type="text/javascript" src="AnimationLibrary/Line.js"></script>
+    <script type="text/javascript" src="AnimationLibrary/ObjectManager.js"></script>
+    <script type="text/javascript" src="AnimationLibrary/AnimationMain.js"></script>
+    <script type="text/javascript" src="AlgorithmLibrary/Algorithm.js"></script>
+    <script type="text/javascript" src="AlgorithmLibrary/BinomialQueue.js"></script>
+</head>
+
+<body onload="init();" class="VisualizationMainPage">
+    <div id="container">
+        <div id="header">
+            <h1>Binomial Queue</h1>
+
+            <div class="dropdown" style="position: absolute; top: 10px; right: 20px;">
+                <button class="dropbtn">Binomial Queue Info</button>
+                <div class="dropdown-content" style="right: 0;">
+                    <b>Binomial Queue:</b><br>
+                    - Time Complexity:<br>
+                    &nbsp;&nbsp;&nbsp; * Best: O(log n)<br>
+                    &nbsp;&nbsp;&nbsp; * Average: O(log n)<br>
+                    &nbsp;&nbsp;&nbsp; * Worst: O(log n)<br><br>
+                    <b>Binomial Queue Code:</b><br>
+
+                    <!-- Language Selection Dropdown -->
+                    <label for="language">Choose Language:</label>
+                    <select id="language" onchange="changeLanguage(this.value)">
+                        <option value="c">C</option>
+                        <option value="c++">C++</option>
+                        <option value="python">Python</option>
+                        <option value="java">Java</option>
+                        <option value="javascript" selected>JavaScript</option>
+                    </select>
+
+                    <b>Binomial Queue Code:</b><br>
+                    <pre id="codeDisplay">
+            Choose a language to see code here.
+                    </pre>
+                </div>
+            </div>
+
+        </div>
+
+        <div id="mainContent">
+            <div id="algoControlSection">
+                <!-- Table for buttons to control specific animation (insert/find/etc.) -->
+                <table id="AlgorithmSpecificControls"></table>
+            </div>
+
+            <!-- Drawing canvas where all animation is done -->
+            <canvas id="canvas" width="1000" height="500"></canvas>
+
+            <div id="generalAnimationControlSection">
+                <!-- Table for buttons to control general animation (play/pause/undo/etc) -->
+                <table id="GeneralAnimationControls"></table>
+            </div>
+        </div> <!-- mainContent -->
+
+        <div id="footer">
+            <p><a href="index.html">DSA Dazzle</a></p>
+        </div>
+    </div><!-- container -->
+
+
+    <script type="text/javascript">
+        let selectedLanguage = 'javascript';
+
+        // Function to update the code display based on the selected language
+        function updateCodeDisplay() {
+            document.getElementById('codeDisplay').innerText = getBinomialQueueCodeSnippet(selectedLanguage);
+        }
+
+        // Function to change the selected language
+        function changeLanguage(language) {
+            selectedLanguage = language;
+            updateCodeDisplay();
+        }
+
+        // Function to return Binomial Queue code snippets based on language
+        function getBinomialQueueCodeSnippet(language) {
+            const codeSnippets = {
+                'javascript': `
+class BinomialQueue {
+    constructor() {
+        this.queue = [];
+    }
+    merge(queue) {
+        this.queue = this.queue.concat(queue);
+        this.queue.sort((a, b) => a - b);
+    }
+    insert(key) {
+        let newQueue = [key];
+        this.merge(newQueue);
+    }
+    removeSmallest() {
+        if (this.queue.length === 0) return null;
+        let smallest = this.queue.shift();
+        return smallest;
+    }
+    clear() {
+        this.queue = [];
+    }
+    printQueue() {
+        console.log(this.queue);
+    }
+}
+const binomialQueue = new BinomialQueue();
+binomialQueue.insert(10);
+binomialQueue.insert(5);
+binomialQueue.insert(15);
+binomialQueue.printQueue();
+console.log(binomialQueue.removeSmallest());
+binomialQueue.printQueue();
+
+                    `,
+                'python': `
+        class BinomialQueue:
+            def __init__(self):
+                self.queue = []
+    
+            # Merge two binomial queues
+            def merge(self, queue):
+                self.queue.extend(queue)
+                self.queue.sort()
+    
+            # Insert an element into the queue
+            def insert(self, key):
+                new_queue = [key]
+                self.merge(new_queue)
+    
+            # Remove the smallest element from the queue
+            def remove_smallest(self):
+                if not self.queue:
+                    return None
+                smallest = self.queue.pop(0)
+                return smallest
+    
+            # Clear the binomial queue
+            def clear(self):
+                self.queue = []
+    
+            # Print the elements of the queue
+            def print_queue(self):
+                print(self.queue)
+    
+        # Usage example
+        binomial_queue = BinomialQueue()
+        binomial_queue.insert(10)
+        binomial_queue.insert(5)
+        binomial_queue.insert(15)
+        binomial_queue.print_queue()  # Output: [5, 10, 15]
+        print(binomial_queue.remove_smallest())  # Output: 5
+        binomial_queue.print_queue()  # Output: [10, 15]
+                    `,
+                'c': `
+        #include <stdio.h>
+        #include <stdlib.h>
+    
+        void merge(int* queue, int* n, int* newQueue, int newQueueSize) {
+            for (int i = 0; i < newQueueSize; i++) {
+                queue[*n + i] = newQueue[i];
+            }
+            *n += newQueueSize;
+            // Sorting the queue
+            for (int i = 0; i < *n - 1; i++) {
+                for (int j = i + 1; j < *n; j++) {
+                    if (queue[i] > queue[j]) {
+                        int temp = queue[i];
+                        queue[i] = queue[j];
+                        queue[j] = temp;
+                    }
+                }
+            }
+        }
+    
+        void insert(int* queue, int* n, int key) {
+            int newQueue[] = {key};
+            merge(queue, n, newQueue, 1);
+        }
+    
+        int removeSmallest(int* queue, int* n) {
+            if (*n == 0) return -1;  // Empty queue
+            int smallest = queue[0];
+            for (int i = 1; i < *n; i++) {
+                queue[i - 1] = queue[i];
+            }
+            (*n)--;
+            return smallest;
+        }
+    
+        void printQueue(int* queue, int n) {
+            for (int i = 0; i < n; i++) {
+                printf("%d ", queue[i]);
+            }
+            printf("\n");
+        }
+    
+        int main() {
+            int queue[100];
+            int n = 0;
+    
+            insert(queue, &n, 10);
+            insert(queue, &n, 5);
+            insert(queue, &n, 15);
+            printQueue(queue, n);  // Output: 5 10 15
+    
+            printf("Removed smallest: %d\n", removeSmallest(queue, &n));  // Output: 5
+            printQueue(queue, n);  // Output: 10 15
+    
+            return 0;
+        }
+                    `,
+                'c++': `
+        #include <iostream>
+        #include <vector>
+        #include <algorithm>
+    
+        class BinomialQueue {
+        public:
+            std::vector<int> queue;
+    
+            // Merge two binomial queues
+            void merge(std::vector<int>& newQueue) {
+                queue.insert(queue.end(), newQueue.begin(), newQueue.end());
+                std::sort(queue.begin(), queue.end());
+            }
+    
+            // Insert an element into the queue
+            void insert(int key) {
+                std::vector<int> newQueue = {key};
+                merge(newQueue);
+            }
+    
+            // Remove the smallest element from the queue
+            int removeSmallest() {
+                if (queue.empty()) return -1;
+                int smallest = queue.front();
+                queue.erase(queue.begin());
+                return smallest;
+            }
+    
+            // Clear the binomial queue
+            void clear() {
+                queue.clear();
+            }
+    
+            // Print the elements of the queue
+            void printQueue() {
+                for (int val : queue) {
+                    std::cout << val << " ";
+                }
+                std::cout << std::endl;
+            }
+        };
+    
+        int main() {
+            BinomialQueue binomialQueue;
+            binomialQueue.insert(10);
+            binomialQueue.insert(5);
+            binomialQueue.insert(15);
+            binomialQueue.printQueue();  // Output: 5 10 15
+    
+            std::cout << "Removed smallest: " << binomialQueue.removeSmallest() << std::endl;  // Output: 5
+            binomialQueue.printQueue();  // Output: 10 15
+    
+            return 0;
+        }
+                    `
+            };
+            return codeSnippets[language];
+        }
+
+        // Initialize the display with default language
+        updateCodeDisplay();
+    </script>
+
+</body>
+
+</html>

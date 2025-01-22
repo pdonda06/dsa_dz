@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Ternary Search Tree Visualization</title>
+
+    <!-- CSS sheet for how the page is laid out -->
+    <link rel="stylesheet" href="visualizationPageStyle.css">
+    <link rel="shortcut icon" href="logo.jpg" />
+
+    <!-- jQuery stuff. Only used for the animation speed slider. -->
+    <link rel="stylesheet" href="ThirdParty/jquery-ui-1.8.11.custom.css">
+    <script src="ThirdParty/jquery-1.5.2.min.js"></script>
+    <script src="ThirdParty/jquery-ui-1.8.11.custom.min.js"></script>
+
+    <!-- JavaScript for the actual visualization code -->
+    <script type="application/javascript" src="AnimationLibrary/CustomEvents.js"></script>
+    <script type="application/javascript" src="AnimationLibrary/UndoFunctions.js"></script>
+    <script type="application/javascript" src="AnimationLibrary/AnimatedObject.js"></script>
+    <script type="application/javascript" src="AnimationLibrary/AnimatedLabel.js"></script>
+    <script type="application/javascript" src="AnimationLibrary/AnimatedCircle.js"></script>
+    <script type="application/javascript" src="AnimationLibrary/AnimatedRectangle.js"></script>
+    <script type="application/javascript" src="AnimationLibrary/AnimatedLinkedList.js"></script>
+    <script type="application/javascript" src="AnimationLibrary/HighlightCircle.js"></script>
+    <script type="application/javascript" src="AnimationLibrary/Line.js"></script>
+    <script type="application/javascript" src="AnimationLibrary/ObjectManager.js"></script>
+    <script type="application/javascript" src="AnimationLibrary/AnimationMain.js"></script>
+    <script type="application/javascript" src="AlgorithmLibrary/Algorithm.js"></script>
+    <script type="application/javascript" src="AlgorithmLibrary/TST.js"></script>
+
+<script>
+        // Code Snippets Object
+        const TSTSnippets = {
+            'c': {
+                'insert': `TSTNode* insert(TSTNode* root, char *key) {
+    if (!root) root = createNode(*key);
+    if (*key < root->data) root->left = insert(root->left, key);
+    else if (*key > root->data) root->right = insert(root->right, key);
+    else if (*(key+1)) root->eq = insert(root->eq, key+1);
+    else root->isEndOfString = 1;
+    return root;
+}`,
+                'search': `int search(TSTNode* root, char *key) {
+    if (!root) return 0;
+    if (*key < root->data) return search(root->left, key);
+    else if (*key > root->data) return search(root->right, key);
+    else if (*(key+1) == '\\0') return root->isEndOfString;
+    return search(root->eq, key+1);
+}`,
+                'delete': `TSTNode* deleteNode(TSTNode* root, char *key) {
+    if (!root) return NULL;
+    if (*key < root->data) root->left = deleteNode(root->left, key);
+    else if (*key > root->data) root->right = deleteNode(root->right, key);
+    else if (*(key+1)) root->eq = deleteNode(root->eq, key+1);
+    else root->isEndOfString = 0;
+    return root;
+}`,
+                'print': `void traverseTST(TSTNode* root, char* buffer, int depth) {
+    if (!root) return;
+    traverseTST(root->left, buffer, depth);
+    buffer[depth] = root->data;
+    if (root->isEndOfString) buffer[depth+1] = '\\0', printf("%s\\n", buffer);
+    traverseTST(root->eq, buffer, depth + 1);
+    traverseTST(root->right, buffer, depth);
+}`
+            },
+            'cpp': {
+                'insert': `TSTNode* insert(TSTNode* root, const char* key) {
+    if (!root) root = new TSTNode(*key);
+    if (*key < root->data) root->left = insert(root->left, key);
+    else if (*key > root->data) root->right = insert(root->right, key);
+    else if (*(key+1)) root->eq = insert(root->eq, key+1);
+    else root->isEndOfString = true;
+    return root;
+}`,
+                'search': `bool search(TSTNode* root, const char* key) {
+    if (!root) return false;
+    if (*key < root->data) return search(root->left, key);
+    else if (*key > root->data) return search(root->right, key);
+    else if (*(key+1) == '\\0') return root->isEndOfString;
+    return search(root->eq, key+1);
+}`,
+                'delete': `void deleteNode(TSTNode* &root, const char* key) {
+    if (!root) return;
+    if (*key < root->data) deleteNode(root->left, key);
+    else if (*key > root->data) deleteNode(root->right, key);
+    else if (*(key+1)) deleteNode(root->eq, key+1);
+    else root->isEndOfString = false;
+}`,
+                'print': `void traverseTST(TSTNode* root, string buffer = "") {
+    if (!root) return;
+    traverseTST(root->left, buffer);
+    buffer.push_back(root->data);
+    if (root->isEndOfString) cout << buffer << endl;
+    traverseTST(root->eq, buffer);
+    buffer.pop_back();
+    traverseTST(root->right, buffer);
+}`
+            },
+            'python': {
+                'insert': `def insert(root, key):
+    if not root:
+        return TSTNode(key[0])
+    if key[0] < root.data:
+        root.left = insert(root.left, key)
+    elif key[0] > root.data:
+        root.right = insert(root.right, key)
+    else:
+        if len(key) > 1:
+            root.eq = insert(root.eq, key[1:])
+        else:
+            root.isEndOfString = True
+    return root`,
+                'search': `def search(root, key):
+    if not root:
+        return False
+    if key[0] < root.data:
+        return search(root.left, key)
+    elif key[0] > root.data:
+        return search(root.right, key)
+    elif len(key) == 1:
+        return root.isEndOfString
+    return search(root.eq, key[1:])`,
+                'delete': `def deleteNode(root, key):
+    if not root:
+        return None
+    if key[0] < root.data:
+        root.left = deleteNode(root.left, key)
+    elif key[0] > root.data:
+        root.right = deleteNode(root.right, key)
+    elif len(key) > 1:
+        root.eq = deleteNode(root.eq, key[1:])
+    else:
+        root.isEndOfString = False
+    return root`,
+                'print': `def traverseTST(root, buffer=""):
+    if not root:
+        return
+    traverseTST(root.left, buffer)
+    traverseTST(root.eq, buffer + root.data)
+    if root.isEndOfString:
+        print(buffer + root.data)
+    traverseTST(root.right, buffer)`
+            },
+            'javascript': {
+                'insert': `function insert(root, key) {
+    if (!root) return new TSTNode(key[0]);
+    if (key[0] < root.data) root.left = insert(root.left, key);
+    else if (key[0] > root.data) root.right = insert(root.right, key);
+    else {
+        if (key.length > 1) root.eq = insert(root.eq, key.slice(1));
+        else root.isEndOfString = true;
+    }
+    return root;
+}`,
+                'search': `function search(root, key) {
+    if (!root) return false;
+    if (key[0] < root.data) return search(root.left, key);
+    else if (key[0] > root.data) return search(root.right, key);
+    else if (key.length === 1) return root.isEndOfString;
+    return search(root.eq, key.slice(1));
+}`,
+                'delete': `function deleteNode(root, key) {
+    if (!root) return null;
+    if (key[0] < root.data) root.left = deleteNode(root.left, key);
+    else if (key[0] > root.data) root.right = deleteNode(root.right, key);
+    else {
+        if (key.length > 1) root.eq = deleteNode(root.eq, key.slice(1));
+        else root.isEndOfString = false;
+    }
+    return root;
+}`,
+                'print': `function traverseTST(root, buffer = "") {
+    if (!root) return;
+    traverseTST(root.left, buffer);
+    if (root.isEndOfString) console.log(buffer + root.data);
+    traverseTST(root.eq, buffer + root.data);
+    traverseTST(root.right, buffer);
+}`
+            }
+        };
+
+
+        let selectedLanguage = 'javascript';
+        let selectedOperation = 'insert';
+
+        function updateCodeDisplay() {
+            document.getElementById('codeDisplay').innerText = TSTSnippets[selectedLanguage][selectedOperation];
+        }
+
+        function changeLanguage(language) {
+            selectedLanguage = language;
+            updateCodeDisplay();
+        }
+
+        function changeOperation(operation) {
+            selectedOperation = operation;
+            updateCodeDisplay();
+        }
+
+        window.onload = updateCodeDisplay;
+    </script>
+
+</head>
+
+<body onload="init();" class="VisualizationMainPage">
+    <div id="container">
+        <div id="header">
+            <h1>Ternary Search Tree (Trie with BST of children)</h1>
+
+           
+
+            <div class="dropdown" style="position: absolute; top: 10px; right: 20px;">
+                <button class="dropbtn">Hashing Info</button>
+                <div class="dropdown-content" style="right: 0;">
+                    <b>Ternary Search Tree:</b><br>
+                    - Time Complexity:<br>
+                    &nbsp;&nbsp;&nbsp; * Search: O(m)<br>
+                    &nbsp;&nbsp;&nbsp; * Insertion: O(m)<br>
+                    &nbsp;&nbsp;&nbsp; * Deletion: O(m)<br>
+                    where m is the length of the key.<br><br>
+                    
+                    <label for="language">Choose Language:</label>
+                    <select id="language" onchange="changeLanguage(this.value)">
+                        <option value="c">C</option>
+                        <option value="cpp">C++</option>
+                        <option value="python">Python</option>
+                        <option value="java">Java</option>
+                        <option value="javascript" selected>JavaScript</option>
+                    </select>
+
+                    <label for="operation">Choose Operation:</label>
+                    <select id="operation" onchange="changeOperation(this.value)">
+                        <option value="insert">Insert</option>
+                        <option value="search">Search</option>
+                        <option value="delete">Delete</option>
+                        <option value="print">Print</option>
+                    </select><br>
+
+                    <b>Hash Code:</b><br>
+                    <pre id="codeDisplay">
+Choose a language and operation to see code here.
+                    </pre>
+                </div>
+            </div>
+
+        </div>
+
+        <div id="mainContent">
+            <div id="algoControlSection">
+                <!-- Table for buttons to control specific animation (insert/find/etc.) -->
+                <table id="AlgorithmSpecificControls"></table>
+            </div>
+
+            <!-- Drawing canvas where all animation is done -->
+            <canvas id="canvas" width="1000" height="500"></canvas>
+
+            <div id="generalAnimationControlSection">
+                <!-- Table for buttons to control general animation (play/pause/undo/etc) -->
+                <table id="GeneralAnimationControls"></table>
+            </div>
+        </div> <!-- mainContent -->
+
+        <div id="footer">
+            <p><a href="index.html">DSA Dazzle</a></p>
+        </div>
+    </div><!-- container -->
+</body>
+</html>

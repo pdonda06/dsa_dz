@@ -1,0 +1,198 @@
+@charset "utf-8";
+
+
+body {
+	font: 100% Verdana, Arial, Helvetica, sans-serif;
+	/*background: #666666; */
+	margin: 0; /* it's good practice to zero the margin and padding of the body element to account for differing browser defaults */
+	padding: 0;
+	text-align: center; /* this centers the container in IE 5* browsers. The text is then set to the left aligned default in the #container selector */
+	color: #000000;
+}
+
+
+
+
+.VisualizationMainPage #mainContent {
+	/*padding: 0 20px; /* remember that padding is the space inside the div box and margin is the space outside the div box */
+	background: #FFFFFF;
+}
+
+
+
+.VisualizationMainPage #container {
+
+
+	background: #FFFFFF;
+	/*margin: 0 auto; /* the auto margins (in conjunction with a width) center the page */
+	text-align: left; /* this overrides the text-align: center on the body element. */
+}
+
+
+.VisualizationMainPage #algoControlSection
+{
+	background: #DDEEDD; 
+	color:#000000; 
+
+}
+
+
+.VisualizationMainPage #generalAnimationControlSection
+{
+	background: #DDEEDD; 
+	color:#00246B; 
+
+}
+
+.VisualizationMainPage  #header { 
+	background: #0f0066; 
+	color:#CADCFC;
+	padding: 0 10px 0 20px; 
+  
+} 
+ 
+.VisualizationMainPage #header  A:visited 
+	  { text-decoration:none;
+        color:#CADCFC; 
+	   }
+	   
+	   
+.VisualizationMainPage #header h1 {
+	margin: 0; 
+	padding: 10px 0; 
+	}
+	   
+.VisualizationMainPage #header A:link {
+    text-decoration:none;
+    color:#CADCFC;
+	}
+	
+	
+.VisualizationMainPage #container {
+	background: #FFFFFF;
+	margin: 0 auto; /* the auto margins (in conjunction with a width) center the page */
+	text-align: left; /* this overrides the text-align: center on the body element. */
+}	
+	
+	
+.VisualizationMainPage #footer  A:visited { text-decoration:none;
+        color:#CADCFC; 
+}
+
+.VisualizationMainPage #footer A:link {
+    text-decoration:none;
+	color:#CADCFC;
+}
+
+
+	
+
+.VisualizationMainPage #mainContent h1{
+	padding: 0 20px; 
+	background: #FFFFFF;
+	color:#000000
+}
+
+.VisualizationMainPage #mainContent h2{
+	padding: 0 20px; 
+	background: #FFFFFF;
+	color:#00246B
+}
+
+.VisualizationMainPage #mainContent h3{
+	padding: 0 20px; 
+	background: #FFFFFF;
+	color:#00246B
+}
+
+
+
+.VisualizationMainPage #footer { 
+	padding: 0 10px;
+    background: #00246B; 
+	color:#CADCFC;
+} 
+.VisualizationMainPage #footer p {
+	margin: 0; 	padding: 10px 0; 
+}
+
+EM {text-decoration: bold;}
+
+	
+
+/* Add this to your CSS */
+/* Style for the dropdown container */
+.dropdown {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+}
+
+/* Button styling */
+.dropbtn {
+    background-color: #0066cc; /* Lighter, more attractive blue */
+    color: white;
+    padding: 12px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px; /* Rounded corners */
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.dropbtn:hover, .dropbtn:focus {
+    background-color: #005bb5; /* Darker shade on hover */
+    transform: scale(1.05); /* Slightly enlarges the button on hover */
+    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.25); /* Deeper shadow on hover */
+}
+
+/* Dropdown content box */
+.dropdown-content {
+    display: none;
+    position: absolute;
+    right: 0;
+    background: linear-gradient(135deg, #ffffff, #e6f2ff); /* Gradient background */
+    min-width: 280px;
+    max-height: 300px;
+    box-shadow: 0px 8px 16px rgba(0,0,0,0.2);
+    z-index: 1;
+    padding: 15px;
+    color: #000;
+    overflow-y: auto;
+    border-radius: 8px; /* Rounded corners for the dropdown */
+    border: 1px solid #ccc;
+}
+
+/* Styling for paragraphs inside dropdown */
+.dropdown-content p {
+    font-size: 14px;
+    font-family: Arial, sans-serif;
+    white-space: pre-wrap;
+    margin: 10px 0;
+}
+
+/* Preformatted text (e.g., code snippets) */
+.dropdown-content pre {
+    font-family: "Courier New", Courier, monospace;
+    font-size: 12px;
+    background-color: #f4f4f4;
+    padding: 10px;
+    border-left: 3px solid #0066cc; /* Adds a colored bar to the left */
+    border-radius: 4px; /* Rounded corners for code block */
+    white-space: pre-wrap; /* Wrap long code lines */
+    overflow-x: auto;
+}
+
+/* Show the dropdown on hover */
+.dropdown:hover .dropdown-content {
+    display: block;
+    animation: fadeIn 0.3s ease; /* Smooth fade-in animation */
+}
+
+/* Add fade-in effect */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}

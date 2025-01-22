@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Breadth-First Search</title>
+
+    <!-- CSS sheet for how the page is laid out -->
+    <link rel="stylesheet" href="visualizationPageStyle.css">
+    <link rel="shortcut icon" href="logo.jpg" />
+
+    <!-- jQuery stuff. Only used for the animation speed slider. -->
+    <link rel="stylesheet" href="ThirdParty/jquery-ui-1.8.11.custom.css">
+    <script src="ThirdParty/jquery-1.5.2.min.js"></script>
+    <script src="ThirdParty/jquery-ui-1.8.11.custom.min.js"></script>
+
+    <!-- JavaScript for the actual visualization code -->
+    <script type="text/javascript" src="AnimationLibrary/CustomEvents.js"></script>
+    <script type="text/javascript" src="AnimationLibrary/UndoFunctions.js"></script>
+    <script type="text/javascript" src="AnimationLibrary/AnimatedObject.js"></script>
+    <script type="text/javascript" src="AnimationLibrary/AnimatedLabel.js"></script>
+    <script type="text/javascript" src="AnimationLibrary/AnimatedCircle.js"></script>
+    <script type="text/javascript" src="AnimationLibrary/AnimatedRectangle.js"></script>
+    <script type="text/javascript" src="AnimationLibrary/AnimatedLinkedList.js"></script>
+    <script type="text/javascript" src="AnimationLibrary/HighlightCircle.js"></script>
+    <script type="text/javascript" src="AnimationLibrary/Line.js"></script>
+    <script type="text/javascript" src="AnimationLibrary/ObjectManager.js"></script>
+    <script type="text/javascript" src="AnimationLibrary/AnimationMain.js"></script>
+    <script type="text/javascript" src="AlgorithmLibrary/Algorithm.js"></script>
+    <script type="text/javascript" src="AlgorithmLibrary/Graph.js"></script>
+    <script type="text/javascript" src="AlgorithmLibrary/BFS.js"></script>
+</head>
+
+<body onload="init();" class="VisualizationMainPage">
+    <div id="container">
+        <div id="header">
+            <h1>Breadth-First Search</h1>
+
+            <!-- BFS Code Dropdown Section -->
+            <div class="dropdown" style="position: absolute; top: 10px; right: 20px;">
+                <button class="dropbtn">BFS Info</button>
+                <div class="dropdown-content" style="right: 0;">
+                    <b>BFS (Breadth-First Search):</b><br>
+                    - Time Complexity: O(V + E)<br>
+                    - Space Complexity: O(V)<br><br>
+
+                    <!-- Language Selection Dropdown -->
+                    <label for="language">Choose Language:</label>
+                    <select id="language" onchange="changeLanguage(this.value)">
+                        <option value="c">C</option>
+                        <option value="c++">C++</option>
+                        <option value="python">Python</option>
+                        <option value="java">Java</option>
+                        <option value="javascript" selected>JavaScript</option>
+                    </select>
+
+                    <b>BFS Code:</b><br>
+                    <pre id="codeDisplay">
+Choose a language to see code here.
+                    </pre>
+                </div>
+            </div>
+        </div>
+
+        <div id="mainContent">
+            <div id="algoControlSection">
+                <!-- Table for buttons to control specific animation (insert/find/etc.) -->
+                <table id="AlgorithmSpecificControls"></table>
+            </div>
+
+            <!-- Drawing canvas where all animation is done -->
+            <canvas id="canvas" width="1000" height="500"></canvas>
+
+            <div id="generalAnimationControlSection">
+                <!-- Table for buttons to control general animation (play/pause/undo/etc) -->
+                <table id="GeneralAnimationControls"></table>
+            </div>
+        </div> <!-- mainContent -->
+
+        <div id="footer">
+            <p><a href="index.html">DSA Dazzle</a></p>
+        </div>
+    </div><!-- container -->
+
+    <script type="text/javascript">
+        let selectedLanguage = 'javascript';
+
+        // Function to update the code display based on the selected language
+        function updateCodeDisplay() {
+            document.getElementById('codeDisplay').innerText = getBFSCodeSnippet(selectedLanguage);
+        }
+
+        // Function to change the selected language
+        function changeLanguage(language) {
+            selectedLanguage = language;
+            updateCodeDisplay();
+        }
+
+        // Function to return BFS code snippets based on language
+        function getBFSCodeSnippet(language) {
+            const codeSnippets = {
+                'c': `
+void bfs(int graph[6][6], int start) {
+    bool visited[6] = { false };
+    std::queue<int> q;
+    visited[start] = true;
+    q.push(start);
+
+    while (!q.empty()) {
+        int node = q.front();
+        printf("%d ", node);
+        q.pop();
+
+        for (int i = 0; i < 6; i++) {
+            if (graph[node][i] == 1 && !visited[i]) {
+                visited[i] = true;
+                q.push(i);
+            }
+        }
+    }
+}
+                `,
+                'c++': `
+void bfs(vector<vector<int>>& graph, int start) {
+    vector<bool> visited(graph.size(), false);
+    queue<int> q;
+    visited[start] = true;
+    q.push(start);
+
+    while (!q.empty()) {
+        int node = q.front();
+        cout << node << " ";
+        q.pop();
+
+        for (int i = 0; i < graph.size(); i++) {
+            if (graph[node][i] == 1 && !visited[i]) {
+                visited[i] = true;
+                q.push(i);
+            }
+        }
+    }
+}
+                `,
+                'python': `
+from collections import deque
+
+def bfs(graph, start):
+    visited = [False] * len(graph)
+    q = deque([start])
+    visited[start] = True
+
+    while q:
+        node = q.popleft()
+        print(node, end=" ")
+
+        for i in range(len(graph)):
+            if graph[node][i] == 1 and not visited[i]:
+                visited[i] = True
+                q.append(i)
+                `,
+                'java': `
+public class BFS {
+    public static void bfs(int[][] graph, int start) {
+        boolean[] visited = new boolean[graph.length];
+        Queue<Integer> q = new LinkedList<>();
+        visited[start] = true;
+        q.add(start);
+
+        while (!q.isEmpty()) {
+            int node = q.poll();
+            System.out.print(node + " ");
+
+            for (int i = 0; i < graph.length; i++) {
+                if (graph[node][i] == 1 && !visited[i]) {
+                    visited[i] = true;
+                    q.add(i);
+                }
+            }
+        }
+    }
+}
+                `,
+                'javascript': `
+function bfs(graph, start) {
+    const visited = Array(graph.length).fill(false);
+    const queue = [start];
+    visited[start] = true;
+
+    while (queue.length > 0) {
+        const node = queue.shift();
+        console.log(node);
+
+        for (let i = 0; i < graph.length; i++) {
+            if (graph[node][i] === 1 && !visited[i]) {
+                visited[i] = true;
+                queue.push(i);
+            }
+        }
+    }
+}
+                `
+            };
+            return codeSnippets[language];
+        }
+
+        // Initialize the display with default language
+        updateCodeDisplay();
+
+</script>
+</body>
+</html>
